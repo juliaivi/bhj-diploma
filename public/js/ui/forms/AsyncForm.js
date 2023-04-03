@@ -1,3 +1,5 @@
+//const { format } = require("morgan");
+
 /**
  * Класс AsyncForm управляет всеми формами
  * приложения, которые не должны быть отправлены с
@@ -13,7 +15,12 @@ class AsyncForm {
    * через registerEvents()
    * */
   constructor(element) {
+    if (element == "" || element == null || element == undefined) {
+      throw new Error('Ошибка!Элемент не найден'); 
+    }
 
+    this.element = element;
+    this.registerEvents();
   }
 
   /**
@@ -21,7 +28,11 @@ class AsyncForm {
    * вызывает метод submit()
    * */
   registerEvents() {
-
+    this.element.addEventListener('submit', (event) => {
+      event.preventDefault();
+      console.log(event)
+      this.submit();
+    })
   }
 
   /**
@@ -32,7 +43,16 @@ class AsyncForm {
    * }
    * */
   getData() {
+    const formData = new FormData(this.element)
+    let entries = formData.entries();
+    let data = {}; 
 
+    for(let item of entries) {
+      let key = item[0];
+      let value = item[1]
+      data[key] = value; 
+    }
+    return data;
   }
 
   onSubmit(options){
@@ -44,6 +64,7 @@ class AsyncForm {
    * данные, полученные из метода getData()
    * */
   submit() {
-
+    console.log(this.getData())
+    this.onSubmit(this.getData());
   }
 }
