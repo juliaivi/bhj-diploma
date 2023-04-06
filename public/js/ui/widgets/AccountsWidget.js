@@ -33,28 +33,21 @@ class AccountsWidget {
    * вызывает AccountsWidget.onSelectAccount()
    * */
   registerEvents() {
-    //const accountsPane = document.querySelector(".accounts-panel");
     const createAccount = this.element.querySelector(".create-account");
     console.log(createAccount);
     createAccount.addEventListener('click', (e) => {
       e.preventDefault();
       App.getModal("createAccount").open();
     })
-    // accountsPane.addEventListener("click", event => {
-    //   event.preventDefault();
-    //   if (event.target == createAccount) {
-    //     App.getModal("createAccount").open();
-    //   }
 
-      const accounts = this.element.querySelectorAll('.account');
-      accounts.forEach((el) => {
-        el.addEventListener('click', () => {
-          el.preventDefault();
-          this.onSelectAccount(el);
-        })
-      })
-    //});
-  }
+    let accountsPanel = document.querySelector('.accounts-panel');
+    accountsPanel.addEventListener('click', (event) => {
+      let currentЕlement = event.target;
+      let account = currentЕlement.closest(".account")
+      event.preventDefault();
+      this.onSelectAccount(account);
+    })
+    }
 
   /**
    * Метод доступен только авторизованным пользователям
@@ -66,14 +59,12 @@ class AccountsWidget {
    * Отображает список полученных счетов с помощью
    * метода renderItem()
    * */
-
+  
   update() {
     let userCurrent = User.current();
     if (userCurrent) {
-      console.log(userCurrent);
-
-      Account.list(userCurrent, (err, response) => {
-        console.log(response)
+    
+      Account.list([], (err, response) => {
         if (err) {
           return err;
         }
@@ -84,9 +75,11 @@ class AccountsWidget {
 
         
           this.clear();
-          response.data.forEach((el) => {
-          this.renderItem(el);
-        });  
+          if (response.data) {
+            response.data.forEach((el) => {
+              this.renderItem(el);
+            }); 
+          } 
         
       })
     }
@@ -98,7 +91,7 @@ class AccountsWidget {
    * в боковой колонке
    * */
   clear() {
-    let accounts = this.element.querySelectorAll('.account');
+    let accounts = Array.from(this.element.querySelectorAll('.account'));
     for (const account of accounts) {
       account.remove();
     }
@@ -112,10 +105,14 @@ class AccountsWidget {
    * Вызывает App.showPage( 'transactions', { account_id: id_счёта });
    * */
   onSelectAccount(element) {
-    let idebarMenu = document.querySelector('.idebar-menu');
+    let idebarMenu = document.querySelector('.accounts-panel');
     idebarMenu.querySelectorAll('.account').forEach((el) => {
       el.classList.remove('active');
     })
+
+    if (!element) {
+      return;
+    }
 
     element.classList.add('active');
     App.showPage( 'transactions', {
@@ -129,7 +126,7 @@ class AccountsWidget {
    * item - объект с данными о счёте
    * */
   getAccountHTML(item) {
-    return ` <li class="active account" data-id="${item.id}">
+    return ` <li class="account" data-id="${item.id}">
               <a href="#">
                 <span>${item.name}</span> /
                 <span>${item.sum}₽</span>
@@ -144,6 +141,6 @@ class AccountsWidget {
    * и добавляет его внутрь элемента виджета
    * */
   renderItem(data) {
-    this.element.insertAjacentHTML('beforeend', this.getAccountHTML(data));
+    this.element.insertAdjacentHTML('beforeend', this.getAccountHTML(data));
   }
 }
