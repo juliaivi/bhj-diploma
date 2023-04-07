@@ -33,21 +33,18 @@ class AccountsWidget {
    * вызывает AccountsWidget.onSelectAccount()
    * */
   registerEvents() {
-    const createAccount = this.element.querySelector(".create-account");
-    console.log(createAccount);
-    createAccount.addEventListener('click', (e) => {
-      e.preventDefault();
-      App.getModal("createAccount").open();
-    })
-
     let accountsPanel = document.querySelector('.accounts-panel');
     accountsPanel.addEventListener('click', (event) => {
-      let currentЕlement = event.target;
-      let account = currentЕlement.closest(".account")
-      event.preventDefault();
-      this.onSelectAccount(account);
-    })
-    }
+      if (event.target.classList.contains("create-account")) {
+        App.getModal("createAccount").open();
+      }
+
+      if (event.target.closest(".account")) {
+        event.preventDefault();
+        this.onSelectAccount(event.target.closest(".account"));
+      }
+    });
+  }
 
   /**
    * Метод доступен только авторизованным пользователям
@@ -63,25 +60,16 @@ class AccountsWidget {
   update() {
     let userCurrent = User.current();
     if (userCurrent) {
-    
       Account.list([], (err, response) => {
-        if (err) {
-          return err;
-        }
-
-        if (response == "" || response == null || response == undefined) {
-          return false;
-        }
-
-        
+        if (err == null && response.success) {
           this.clear();
           if (response.data) {
             response.data.forEach((el) => {
               this.renderItem(el);
             }); 
           } 
-        
-      })
+        }  
+      });
     }
   }
 
@@ -91,7 +79,7 @@ class AccountsWidget {
    * в боковой колонке
    * */
   clear() {
-    let accounts = Array.from(this.element.querySelectorAll('.account'));
+    let accounts = this.element.querySelectorAll('.account');
     for (const account of accounts) {
       account.remove();
     }
@@ -105,18 +93,17 @@ class AccountsWidget {
    * Вызывает App.showPage( 'transactions', { account_id: id_счёта });
    * */
   onSelectAccount(element) {
-    let idebarMenu = document.querySelector('.accounts-panel');
-    idebarMenu.querySelectorAll('.account').forEach((el) => {
+    document.querySelectorAll('.account').forEach((el) => {
       el.classList.remove('active');
     })
-
-    if (!element) {
-      return;
-    }
+    
+    // if (!element) {
+    //   return;
+    // }
 
     element.classList.add('active');
-    App.showPage( 'transactions', {
-      account_id: element.dataset.id
+    App.showPage('transactions', {
+      account_id: element.dataset.id,
     });
   }
 

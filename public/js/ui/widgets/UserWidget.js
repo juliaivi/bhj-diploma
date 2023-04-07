@@ -12,7 +12,7 @@ class UserWidget {
    * необходимо выкинуть ошибку.
    * */
   constructor(element) {
-    if (element == "" || element == null || element == undefined) {
+    if (!element) {
       throw new Error("Переданный элемент не существует!!!");
     }
 
@@ -29,8 +29,6 @@ class UserWidget {
   update() {
     if (User.current()) {
       document.querySelector(".user-name").textContent = User.current().name;
-    } else {
-      return;
-    }
+    } 
   }
 }

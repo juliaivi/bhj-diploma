@@ -15,7 +15,7 @@ class AsyncForm {
    * через registerEvents()
    * */
   constructor(element) {
-    if (element == "" || element == null || element == undefined) {
+    if (!element) {
       throw new Error('Ошибка!Элемент не найден'); 
     }
 
@@ -30,7 +30,6 @@ class AsyncForm {
   registerEvents() {
     this.element.addEventListener('submit', (event) => {
       event.preventDefault();
-      console.log(event)
       this.submit();
     })
   }
@@ -55,7 +54,7 @@ class AsyncForm {
     return data;
   }
 
-  onSubmit(options){
+  onSubmit(options) {
 
   }
 
@@ -64,7 +63,6 @@ class AsyncForm {
    * данные, полученные из метода getData()
    * */
   submit() {
-    console.log(this.getData())
     this.onSubmit(this.getData());
   }
 }

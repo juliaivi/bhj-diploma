@@ -31,7 +31,6 @@ class User {
    * */
   static current() {
     let user = JSON.parse(localStorage.getItem('user'));
-    //let user = Object.entries(userLocal);
     if (!user) {
       return undefined;
     }
@@ -44,18 +43,18 @@ class User {
    * авторизованном пользователе.
    * */
   static fetch(callback) {
-    createRequest ({
+    return createRequest ({
       url: this.URL + '/current',
       method: 'GEt',
       callback: (err, response) => {
-        if (response && response.success) {
+        if (err == null && response.success) {
           this.setCurrent(response.user);//Если в результате есть данные об авторизованном пользователе, необходимо обновить данные текущего пользователя
         } else {
           this.unsetCurrent();//Если данных о пользователе нет, необходимо удалить запись об авторизации
         }
         callback(err, response);
       }
-    })
+    });
   }
 
   /**
@@ -65,19 +64,14 @@ class User {
    * User.setCurrent.
    * */
   static login(data, callback) {
-    createRequest({
+    return createRequest({
       url: this.URL + '/login',
       method: 'POST',
-      responseType: 'json',
       data,
       callback: (err, response) => {
         if (response && response.success) {
-          User.setCurrent(response.user);
-        } else {
-          err;
-          console.log("Пользователь c email ... и паролем ... не найден");
-
-        }
+          this.setCurrent(response.user);
+        } 
         callback(err, response);
       }
     });
@@ -90,7 +84,7 @@ class User {
    * User.setCurrent.
    * */
   static register(data, callback) {
-    createRequest({
+    return createRequest({
       url: this.URL + '/register',
       method: 'POST',
       data,
@@ -98,10 +92,10 @@ class User {
         if (response && response.success) {
           User.setCurrent(response.user);//После регистрации установите в случае успешного ответа полученного пользователя с помощью метода User.setCurrent
         } 
-        callback(err, response);
-      },
-    })
 
+        callback(err, response);
+      }
+    });
   }
 
   /**
@@ -118,6 +112,6 @@ class User {
         }
         callback(err, response);
       }
-    })
+    });
   }
 }

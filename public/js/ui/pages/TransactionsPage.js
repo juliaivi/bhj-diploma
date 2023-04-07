@@ -33,22 +33,33 @@ class TransactionsPage {
    * TransactionsPage.removeAccount соответственно
    * */
   registerEvents() {
-    const removeAccount = document.querySelector('.remove-account');
-    const transactionRemove = document.querySelector('.transaction__remove');
+    let contentWrapper = document.querySelector('.content-wrapper');
+    contentWrapper.addEventListener('click', (event) => {
+      if (event.target.classList.contains('remove-account')) {
+        this.removeAccount(event.target);
+      }
 
-    removeAccount.addEventListener('click', (event) => {
-      event.preventDefault();
-      this.removeAccount(event.target);
+      if (event.target.classList.contains('transaction__remove')) {
+        event.preventDefault();
+        this.removeTransaction(event.target.dataset.id);
+      }
     })
+//стары й код, переписала на более короткую версию....
+    // const removeAccount = document.querySelector('.remove-account');
+    // const transactionRemove = document.querySelector('.transaction__remove');
 
-    if (transactionRemove == null) {
-      return false;
-    }
+    // removeAccount.addEventListener('click', (event) => {
+    //   this.removeAccount(event.target);
+    // })
 
-    transactionRemove.addEventListener('click', (event) => {
-      event.preventDefault();
-      this.removeTransaction(event.target.dataset.id);
-    })
+    // if (transactionRemove == null) {
+    //   return false;
+    // }
+
+    // transactionRemove.addEventListener('click', (event) => {
+    //   event.preventDefault();
+    //   this.removeTransaction(event.target.dataset.id);
+    // })
   }
 
   /**
@@ -64,16 +75,8 @@ class TransactionsPage {
     if (this.lastOptions) {
       const id = this.lastOptions.account_id;
       if (confirm('Вы действительно хотите удалить счёт?')) {
-      Account.remove({id}, (err, response) => {
-          if (err) {
-            return;
-          }
-
-          if (!response) {
-            return;
-          }
-
-          if (response.success) {
+        Account.remove({id}, (err, response) => {
+          if (err == null && response.success) {
             this.clear();
             App.updateWidgets();
             App.updateForms();
@@ -91,19 +94,11 @@ class TransactionsPage {
    * */
   removeTransaction(id) {
     if (confirm('Вы действительно хотите удалить эту транзакцию?')) {
-        Transaction.remove(id, (err, response) => {
-        if (err) {
-          return false;
-        }
-
-        if (!response) {
-          return false;
-        }
-
-        if (response && response.success) {
+      Transaction.remove(id, (err, response) => {
+        if (err == null && response.success) {
           App.update();
         }
-    });
+      });
     }
   }
 
@@ -115,36 +110,22 @@ class TransactionsPage {
    * */
   render(options) {
     if (!options) {
-     // throw new Error('Элемент не передан!');
-     return;
+      return;
     }
 
     this.lastOptions = options;
     if (options) {
       Account.get(options.account_id, (err, response) => {
-        if (err) {
-          //throw new Error(err);
-          return;
-        }
-
-        this.renderTitle(response.data.name);
+        if (err == null && response.success) {
+          this.renderTitle(response.data.name);
+        }  
       });
 
       Transaction.list([], (err, response) => {
-        if (err) {
-          //throw new Error(err);
-          return;
+        if (err == null && response.success) {
+           this.renderTransactions(response.data);
         }
-
-        if (!response) {
-          return;
-        }
-
-        if (response.success) {
-          this.renderTransactions(response.data);
-        }
-        
-      })
+      });
     }
   }
 
@@ -162,7 +143,7 @@ class TransactionsPage {
   /**
    * Устанавливает заголовок в элемент .content-title
    * */
-  renderTitle(name){
+  renderTitle(name) {
     this.element.querySelector('.content-title').textContent = name;
   }
 
@@ -170,13 +151,13 @@ class TransactionsPage {
    * Форматирует дату в формате 2019-03-10 03:20:41 (строка)
    * в формат «10 марта 2019 г. в 03:20»
    * */
-  formatDate(date){
+  formatDate(date) {
     const data = new Date(date);
 
     let month = data.toLocaleString('ru', {
       month: 'long',
-    })
-    console.log(month);
+    });
+  
     let hours = data.getHours();
     let hoursCount = hours > 9 ? hours : `0${hours}`;
     let minute = data.getMinutes();
@@ -209,9 +190,8 @@ class TransactionsPage {
           <button class="btn btn-danger transaction__remove" data-id="${item.id}">
             <i class="fa fa-trash"></i>  
           </button>
-        </div>
-      </div>
-    `
+          </div>
+        </div>`;
   }
 
   /**
@@ -220,15 +200,11 @@ class TransactionsPage {
    * */
   renderTransactions(data) {
     let content = this.element.querySelector('.content');
-    // console.log(content)
-    // console.log(data)
     content.innerHTML = '';
-   if (data.length > 0) {
-    data.forEach((el) => {
-      content.insertAdjacentHTML('beforeend', this.getTransactionHTML(el));
-    })
-    } else {
-      return;
+    if (data.length > 0) {
+      data.forEach((el) => {
+        content.insertAdjacentHTML('beforeend', this.getTransactionHTML(el));
+      });
     }
   }
 }

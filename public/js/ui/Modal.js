@@ -11,8 +11,8 @@ class Modal {
    * Если переданный элемент не существует,
    * необходимо выкинуть ошибку.
    * */
-  constructor(element){
-    if (element == "" || element == null || element == undefined) {
+  constructor(element) {
+    if (!element) {
       throw new Error('Ошибка!Элемент не найден');
     }
 
@@ -30,7 +30,7 @@ class Modal {
     closeElement.forEach((el) => {
       el.addEventListener('click', (event) => {
         this.onClose(event);
-      })
+      });
     })
   }
 
