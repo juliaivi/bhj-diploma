@@ -49,10 +49,14 @@ class Sidebar {
     logout.addEventListener('click', (event) => {
       event.preventDefault();
       User.logout((err, response) => {
+        if (err !== null) {
+          console.error(err);
+        }
+        
         if (err == null && response.success) {
           App.setState('init');
         } 
-      }); 
+      });
     })
   }
 }

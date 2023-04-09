@@ -3,38 +3,40 @@
  * на сервер.
  * */
 const createRequest = (options = {}) => {
-    const formData = new FormData();
-    const UserUrl = options.url;
-    let xhr = new XMLHttpRequest;
+    let UserUrl = new URL(options.url, "http://localhost:8000/");
+    let xhr = new XMLHttpRequest();
     
     xhr.responseType = 'json';
 
-    xhr.addEventListener("readystatechange", () => {
-        // if (xhr.readyState !== 4) {
-        //     return;
-        // }
-        
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            options.callback(null, xhr.response);
+    xhr.onload = () => { 
+        if (xhr.status != 200) { 
+            console.log(`Ошибка ${xhr.status}: ${xhr.statusText}`);
         } else {
-            options.callback(new Error (xhr.status + ":" + xhr.statusText)); 
+            options.callback(null, xhr.response);
         }
-    }) 
-  
-    try { 
-        xhr.open(options.method, UserUrl);
+    }
+
+    xhr.onerror = () => {
+        console.error('Запрос не удался');
+    }
+
+    for (let item in options.data) {
+        UserUrl.searchParams.append(item, options.data[item]);
+    }
+
+    try {
+        xhr.open(options.method, UserUrl.href);
+        
         if (options.method === 'GET') {
-            for (let item in options.data) {
-                UserUrl.searchParams.append(item, options.data[value]);
-            }
             xhr.send();
         } else {
+            let formData = new FormData();
             for (let item in options.data) { 
-                formData.append(item, options.data[item]); 
+                formData.append(item, options.data[item]);
             }
             xhr.send(formData);
         }
     } catch (err) {
         options.callback(err);
-    }        
+    }
 }

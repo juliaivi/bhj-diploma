@@ -22,7 +22,12 @@ class CreateTransactionForm extends AsyncForm {
     let accountsSelect = this.element.querySelector('.accounts-select');
 
     Account.list([], (err, response) => {
-      if (err == null && response.success) {
+      if (err !== null) {
+          console.error(err);
+          return err;
+      }
+
+      if (response.success) {
         let options = '';
         response.data.forEach(el => { 
           options += `<option value="${el.id}">${el.name}</option>`;
@@ -41,11 +46,15 @@ class CreateTransactionForm extends AsyncForm {
    * */
   onSubmit(data) {
     Transaction.create(data, (err, response) => {
-      if (err == null && response.success) {
+      if (err !== null) {
+        console.error(err);
+      }
+
+      if (response.success) {
         App.getModal(this.element.closest('.modal').dataset.modalId).close();
         this.element.reset();
         App.update();
       }
-    }); 
+    });
   }
 }

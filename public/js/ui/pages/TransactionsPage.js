@@ -44,22 +44,6 @@ class TransactionsPage {
         this.removeTransaction(event.target.dataset.id);
       }
     })
-//стары й код, переписала на более короткую версию....
-    // const removeAccount = document.querySelector('.remove-account');
-    // const transactionRemove = document.querySelector('.transaction__remove');
-
-    // removeAccount.addEventListener('click', (event) => {
-    //   this.removeAccount(event.target);
-    // })
-
-    // if (transactionRemove == null) {
-    //   return false;
-    // }
-
-    // transactionRemove.addEventListener('click', (event) => {
-    //   event.preventDefault();
-    //   this.removeTransaction(event.target.dataset.id);
-    // })
   }
 
   /**
@@ -76,13 +60,17 @@ class TransactionsPage {
       const id = this.lastOptions.account_id;
       if (confirm('Вы действительно хотите удалить счёт?')) {
         Account.remove({id}, (err, response) => {
-          if (err == null && response.success) {
+          if (err !== null) {
+            console.error(err);
+          }
+
+          if (response.success) {
             this.clear();
             App.updateWidgets();
             App.updateForms();
           }
         })
-      } 
+      }
     }
   }
 
@@ -94,8 +82,12 @@ class TransactionsPage {
    * */
   removeTransaction(id) {
     if (confirm('Вы действительно хотите удалить эту транзакцию?')) {
-      Transaction.remove(id, (err, response) => {
-        if (err == null && response.success) {
+      Transaction.remove({id}, (err, response) => {
+        if (err !== null) {
+          console.error(err);
+        }
+
+        if (response.success) {
           App.update();
         }
       });
@@ -115,15 +107,24 @@ class TransactionsPage {
 
     this.lastOptions = options;
     if (options) {
+
       Account.get(options.account_id, (err, response) => {
-        if (err == null && response.success) {
+        if (err !== null) {
+          console.error(err);
+        }
+
+        if (response.success) {
           this.renderTitle(response.data.name);
-        }  
+        } 
       });
 
-      Transaction.list([], (err, response) => {
-        if (err == null && response.success) {
-           this.renderTransactions(response.data);
+      Transaction.list(options, (err, response) => {
+        if (err !== null) {
+          console.error(err);
+        }
+
+        if (response.success) {
+          this.renderTransactions(response.data);
         }
       });
     }
@@ -144,26 +145,29 @@ class TransactionsPage {
    * Устанавливает заголовок в элемент .content-title
    * */
   renderTitle(name) {
+    if (!name) {
+      console.error('Неполучен заголовок к элементу.')
+    }
+
     this.element.querySelector('.content-title').textContent = name;
   }
-
+  
   /**
    * Форматирует дату в формате 2019-03-10 03:20:41 (строка)
    * в формат «10 марта 2019 г. в 03:20»
    * */
   formatDate(date) {
     const data = new Date(date);
-
     let month = data.toLocaleString('ru', {
       month: 'long',
     });
-  
+ 
     let hours = data.getHours();
     let hoursCount = hours > 9 ? hours : `0${hours}`;
     let minute = data.getMinutes();
     let minuteCount = minute > 9 ? minute : `0${minute}`;
-
-    return `${data.getDay}${month}${data.getFullYear} г. в ${hoursCount}:${minuteCount}`;
+    
+    return `${data.getDate()} ${month} ${data.getFullYear()} г. в ${hoursCount}:${minuteCount}`;
   }
 
   /**
@@ -171,13 +175,13 @@ class TransactionsPage {
    * item - объект с информацией о транзакции
    * */
   getTransactionHTML(item) {
-    return `<div class="transaction transaction_${item.type.toLowerCase() == 'icone' ? 'icone' : 'expanse'} row">
+    return `<div class="transaction transaction_${item.type} row">
               <div class="col-md-7 transaction__details">
                 <div class="transaction__icon">
                   <span class="fa fa-money fa-2x"></span>
                 </div>
                 <div class="transaction__info">
-                <h4 class="transaction__title">${item.name}</h4>
+                <h4 class="transaction__title" >${item.name}</h4>
                 <div class="transaction__date">${this.formatDate(item.created_at)}</div>
               </div>
             </div>
@@ -199,10 +203,14 @@ class TransactionsPage {
    * используя getTransactionHTML
    * */
   renderTransactions(data) {
+    if (!data) {
+      console.error('Не получен список транзакций');
+    }
+
     let content = this.element.querySelector('.content');
     content.innerHTML = '';
     if (data.length > 0) {
-      data.forEach((el) => {
+      data.forEach((el) => {  
         content.insertAdjacentHTML('beforeend', this.getTransactionHTML(el));
       });
     }

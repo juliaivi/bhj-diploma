@@ -61,14 +61,18 @@ class AccountsWidget {
     let userCurrent = User.current();
     if (userCurrent) {
       Account.list([], (err, response) => {
-        if (err == null && response.success) {
+        if (err !== null) {
+          console.error(err);
+        }
+
+        if (response.success) {
           this.clear();
           if (response.data) {
             response.data.forEach((el) => {
               this.renderItem(el);
             }); 
-          } 
-        }  
+          }
+        }
       });
     }
   }
@@ -96,10 +100,6 @@ class AccountsWidget {
     document.querySelectorAll('.account').forEach((el) => {
       el.classList.remove('active');
     })
-    
-    // if (!element) {
-    //   return;
-    // }
 
     element.classList.add('active');
     App.showPage('transactions', {
@@ -128,6 +128,10 @@ class AccountsWidget {
    * и добавляет его внутрь элемента виджета
    * */
   renderItem(data) {
+    if (data == "" || data == null || data == undefined) {
+      console.error('Ошибка в renderItem(data).Не получает массив с информацией о счетах');
+      return;
+    }
     this.element.insertAdjacentHTML('beforeend', this.getAccountHTML(data));
   }
 }

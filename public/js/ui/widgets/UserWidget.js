@@ -27,8 +27,12 @@ class UserWidget {
    * авторизованного пользователя
    * */
   update() {
+    if (!User.current()) {
+      console.error("Не получилось получить информацию о текущем пользователе");
+    }
+    
     if (User.current()) {
       document.querySelector(".user-name").textContent = User.current().name;
-    } 
+    }
   }
 }

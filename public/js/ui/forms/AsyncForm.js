@@ -42,13 +42,13 @@ class AsyncForm {
    * }
    * */
   getData() {
-    const formData = new FormData(this.element)
+    const formData = new FormData(this.element);
     let entries = formData.entries();
     let data = {}; 
 
     for(let item of entries) {
       let key = item[0];
-      let value = item[1]
+      let value = item[1];
       data[key] = value; 
     }
     return data;

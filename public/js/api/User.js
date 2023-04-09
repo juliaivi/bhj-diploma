@@ -43,7 +43,7 @@ class User {
    * авторизованном пользователе.
    * */
   static fetch(callback) {
-    return createRequest ({
+    createRequest ({
       url: this.URL + '/current',
       method: 'GEt',
       callback: (err, response) => {
@@ -64,14 +64,16 @@ class User {
    * User.setCurrent.
    * */
   static login(data, callback) {
-    return createRequest({
+    createRequest({
       url: this.URL + '/login',
       method: 'POST',
       data,
       callback: (err, response) => {
         if (response && response.success) {
           this.setCurrent(response.user);
-        } 
+        } else {
+          console.error(err);
+        }
         callback(err, response);
       }
     });
@@ -84,14 +86,16 @@ class User {
    * User.setCurrent.
    * */
   static register(data, callback) {
-    return createRequest({
+    createRequest({
       url: this.URL + '/register',
       method: 'POST',
       data,
       callback: (err, response) => {
         if (response && response.success) {
           User.setCurrent(response.user);//После регистрации установите в случае успешного ответа полученного пользователя с помощью метода User.setCurrent
-        } 
+        } else {
+          console.error(err);
+        }
 
         callback(err, response);
       }
@@ -103,13 +107,16 @@ class User {
    * выхода необходимо вызвать метод User.unsetCurrent
    * */
   static logout(callback) {
-    return createRequest({
+    createRequest({
       url: this.URL + '/logout',
       method: 'POST',
       callback: (err, response) => {
         if (response && response.success) {
           User.unsetCurrent();
+        } else {
+          console.error(err);
         }
+        
         callback(err, response);
       }
     });
